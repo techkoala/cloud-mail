@@ -55,6 +55,10 @@ With only one domain, you can create multiple different email addresses, similar
 
 - **🔔 Email Push**: Forward received emails to Telegram bots or other email providers.
 
+- **🔀 Forwarding Rules Enhanced**: Support all forwarding, whitelist-only forwarding, and blacklist no-forwarding.
+
+- **🤖 Telegram Commands (MVP)**: Only admin `chat_id` can run bot commands (query + add user).
+
 - **📡 Open API**: Supports batch user creation via API and multi-condition email queries
 
 - **📈 Data Visualization**: Use ECharts to visualize system data, including user email growth.
@@ -64,6 +68,41 @@ With only one domain, you can create multiple different email addresses, similar
 - **🤖 CAPTCHA**: Integrated with Turnstile CAPTCHA to prevent automated registration.
 
 - **📜 More Features**: Under development...
+
+## Telegram Bot Commands (MVP)
+
+### Supported Commands
+
+- `/start`: show onboarding message
+- `/help`: show command help
+- `/status`: show system status (receive/send/storage/version)
+- `/stats [today]`: show stats (global by default, `today` for daily)
+- `/inbox [count]`: list latest inbox emails (default 10, max 20)
+- `/unread [count]`: list unread emails (default 10, max 20)
+- `/search keyword`: search by sender/recipient/subject
+- `/mail emailId`: get email detail link
+- `/mailraw emailId`: show plain text summary
+- `/roles`: list role IDs and names
+- `/users keyword`: search users
+- `/user userId`: show user details (status, role, mailbox count, sent count)
+- `/adduser email roleId`: create user with generated random password
+- `/adduser email password roleId`: create user with custom password
+
+### Setup Steps
+
+1. Create a bot with Telegram `@BotFather` and get `BOT_TOKEN`
+2. Send a message to the bot, then call `getUpdates` to get your `chat_id`
+   - `https://api.telegram.org/bot<BOT_TOKEN>/getUpdates`
+3. In System Settings -> Email Push -> Telegram Bot, save:
+   - `tgBotToken`: bot token
+   - `tgChatId`: allowed chat_id list (comma-separated)
+4. Set webhook (`JWT_SECRET` is the `jwt_secret` env var)
+   - `https://api.telegram.org/bot<BOT_TOKEN>/setWebhook?url=https://<your-domain>/api/telegram/webhook/<JWT_SECRET>`
+5. Verify webhook status:
+   - `GET https://<your-domain>/api/telegram/webhookInfo/<JWT_SECRET>`
+   - `matched = true` means webhook URL is correctly configured
+
+> Note: only chat IDs in `tgChatId` are allowed to run commands. Unauthorized chat IDs are ignored.
 
 ## Tech Stack
 

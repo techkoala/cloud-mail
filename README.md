@@ -60,6 +60,10 @@
 
 - **🔔 邮件推送**：接收邮件后可以转发到TG机器人或其他服务商邮箱
 
+- **🔀 转发规则增强**：支持全部转发、白名单仅转发、黑名单不转发
+
+- **🤖 Telegram命令(MVP)**：仅允许管理员 chat_id 使用命令控制（查询 + 加用户）
+
 - **📡 开放API**：支持使用API批量生成用户，多条件查询邮件 
 
 - **📈 数据可视化**：使用ECharts对系统数据详情，用户邮件增长可视化显示
@@ -70,6 +74,41 @@
 
 - **📜 更多功能**：正在开发中...
 
+
+## Telegram Bot 命令（MVP）
+
+### 支持命令
+
+- `/start`：初始化欢迎信息
+- `/help`：查看命令说明
+- `/status`：查看系统关键状态（收件、发件、存储、版本）
+- `/stats [today]`：查看统计信息（默认全局，`today` 看今日）
+- `/inbox [数量]`：查看最近收件（默认10，最大20）
+- `/unread [数量]`：查看未读邮件（默认10，最大20）
+- `/search 关键词`：按发件人/收件人/主题搜索
+- `/mail 邮件ID`：获取邮件详情链接
+- `/mailraw 邮件ID`：查看邮件文本摘要
+- `/roles`：列出角色ID和名称
+- `/users 关键词`：查用户
+- `/user 用户ID`：看用户详情（状态、角色、邮箱数、发件次数）
+- `/adduser 邮箱 角色ID`：自动生成随机密码新增用户
+- `/adduser 邮箱 密码 角色ID`：指定密码新增用户
+
+### 配置步骤
+
+1. 在 Telegram `@BotFather` 创建机器人，获取 `BOT_TOKEN`
+2. 给机器人发送一条消息后，调用 `getUpdates` 获取 `chat_id`
+   - `https://api.telegram.org/bot<BOT_TOKEN>/getUpdates`
+3. 进入系统设置 -> 邮件推送 -> Telegram 机器人，填写并保存
+   - `tgBotToken`：机器人 token
+   - `tgChatId`：允许执行命令的 chat_id（多个用逗号分隔）
+4. 设置 Webhook（`JWT_SECRET` 为项目环境变量 `jwt_secret`）
+   - `https://api.telegram.org/bot<BOT_TOKEN>/setWebhook?url=https://<your-domain>/api/telegram/webhook/<JWT_SECRET>`
+5. 校验 Webhook 状态
+   - `GET https://<your-domain>/api/telegram/webhookInfo/<JWT_SECRET>`
+   - 当 `matched = true` 时表示当前 Webhook 地址正确
+
+> 说明：只在 `tgChatId` 白名单内的聊天可执行命令，未授权 chat_id 会被忽略。
 
 
 ## 技术栈
@@ -151,6 +190,3 @@ cloud-mail
 ## 交流
 
 [Telegram](https://t.me/cloud_mail_tg)
-
-
-
