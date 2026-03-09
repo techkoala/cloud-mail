@@ -132,14 +132,18 @@ export async function email(message, env, ctx) {
 		emailRow = await emailService.completeReceive({ env }, account ? emailConst.status.RECEIVE : emailConst.status.NOONE, emailRow.emailId);
 
 
-		if (ruleType === settingConst.ruleType.RULE) {
+		const receiveEmail = (message.to || '').trim().toLowerCase();
+		const ruleEmails = (ruleEmail || '')
+			.split(',')
+			.map(email => email.trim().toLowerCase())
+			.filter(Boolean);
 
-			const emails = ruleEmail.split(',');
+		if (ruleType === settingConst.ruleType.RULE && !ruleEmails.includes(receiveEmail)) {
+			return;
+		}
 
-			if (!emails.includes(message.to)) {
-				return;
-			}
-
+		if (ruleType === settingConst.ruleType.BLACK && ruleEmails.includes(receiveEmail)) {
+			return;
 		}
 
 		//转发到TG

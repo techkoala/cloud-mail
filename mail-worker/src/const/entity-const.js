@@ -114,7 +114,8 @@ export const settingConst = {
 	},
 	ruleType: {
 		ALL: 0,
-		RULE: 1
+		RULE: 1,
+		BLACK: 2
 	},
 	noRecipient: {
 		OPEN: 0,

@@ -257,7 +257,7 @@
               <div class="setting-item">
                 <div><span>{{ $t('forwardingRules') }}</span></div>
                 <div class="forward">
-                  <span>{{ setting.ruleType === 0 ? $t('forwardAll') : $t('rules') }}</span>
+                  <span>{{ getRuleTypeLabel(setting.ruleType) }}</span>
                   <el-button class="opt-button" size="small" type="primary" @click="openForwardRules">
                     <Icon icon="fluent:settings-48-regular" width="18" height="18"/>
                   </el-button>
@@ -585,7 +585,8 @@
           <div class="dialog-footer">
             <el-radio-group v-model="ruleType">
               <el-radio :value="0">{{ $t('forwardAll') }}</el-radio>
-              <el-radio :value="1">{{ $t('rules') }}</el-radio>
+              <el-radio :value="1">{{ $t('ruleWhitelist') }}</el-radio>
+              <el-radio :value="2">{{ $t('ruleBlacklist') }}</el-radio>
             </el-radio-group>
             <el-button :loading="settingLoading" type="primary" @click="ruleEmailSave">
               {{ $t('save') }}
@@ -1033,6 +1034,18 @@ function openForwardRules() {
     ruleEmail.value.push(...list)
   }
   forwardRulesShow.value = true
+}
+
+function getRuleTypeLabel(type) {
+  if (type === 1) {
+    return t('ruleWhitelist')
+  }
+
+  if (type === 2) {
+    return t('ruleBlacklist')
+  }
+
+  return t('forwardAll')
 }
 
 function emailAddTag(val) {
