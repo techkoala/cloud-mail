@@ -235,7 +235,7 @@ const telegramService = {
 			`/mail 邮件ID - 查看指定邮件详情\n` +
 			`/mailraw 邮件ID - 查看邮件文本摘要\n` +
 			`/roles - 查看角色ID列表\n` +
-			`/users 关键词 - 查询用户\n` +
+			`/users [关键词] - 查询用户（不填则返回全部）\n` +
 			`/user 用户ID - 查看用户详情\n` +
 			`/adduser 邮箱 角色ID - 自动随机密码添加用户\n` +
 			`/adduser 邮箱 密码 角色ID - 指定密码添加用户`;
@@ -436,32 +436,66 @@ const telegramService = {
 	async searchUsers(c, chatId, argsText) {
 
 		const keyword = (argsText || '').trim();
+		const userList = await this.listUsers(c, keyword);
 
-		if (!keyword) {
-			await this.sendText(c, chatId, '用法: /users 关键词');
+		if (!userList || userList.length === 0) {
+			if (keyword) {
+				await this.sendText(c, chatId, `没有找到关键词 "${this.shortText(keyword, 50)}" 的用户。`);
+			} else {
+				await this.sendText(c, chatId, '暂无用户。');
+			}
 			return;
 		}
 
-		const data = await userService.list(c, {
-			num: 1,
-			size: 10,
-			email: keyword,
-			timeSort: 0,
-			status: -1,
-			isDel: 0
-		});
-
-		if (!data.list || data.list.length === 0) {
-			await this.sendText(c, chatId, `没有找到关键词 "${this.shortText(keyword, 50)}" 的用户。`);
-			return;
-		}
-
-		const lines = data.list.map(item => {
+		const lines = userList.map(item => {
 			const status = item.status === 1 ? 'BAN' : 'NORMAL';
 			return `#${item.userId} ${item.email} | roleId=${item.type} | status=${status}`;
 		});
 
-		await this.sendText(c, chatId, `命中 ${data.list.length} 个用户:\n${lines.join('\n')}`);
+		const title = keyword
+			? `命中 ${userList.length} 个用户（关键词: ${this.shortText(keyword, 50)}）:`
+			: `用户列表（共 ${userList.length} 个）:`;
+
+		await this.sendText(c, chatId, `${title}\n${lines.join('\n')}`);
+	},
+
+	async listUsers(c, keyword = '') {
+
+		const size = 50;
+		const all = [];
+		let num = 1;
+
+		while (true) {
+			const data = await userService.list(c, {
+				num,
+				size,
+				email: keyword,
+				timeSort: 0,
+				status: -1,
+				isDel: 0
+			});
+
+			const list = data?.list || [];
+
+			if (list.length === 0) {
+				break;
+			}
+
+			all.push(...list);
+
+			if (list.length < size) {
+				break;
+			}
+
+			// 防止在大数据量下单次命令返回过多
+			if (all.length >= 500) {
+				break;
+			}
+
+			num++;
+		}
+
+		return all;
 	},
 
 	async showUser(c, chatId, argsList) {

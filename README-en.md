@@ -83,7 +83,7 @@ With only one domain, you can create multiple different email addresses, similar
 - `/mail emailId`: get email detail link
 - `/mailraw emailId`: show plain text summary
 - `/roles`: list role IDs and names
-- `/users keyword`: search users
+- `/users [keyword]`: search users (omit keyword to list all)
 - `/user userId`: show user details (status, role, mailbox count, sent count)
 - `/adduser email roleId`: create user with generated random password
 - `/adduser email password roleId`: create user with custom password
