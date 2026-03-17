@@ -103,6 +103,17 @@ const accountService = {
 		return orm(c).select().from(account).where(sql`${account.email} COLLATE NOCASE = ${email}`).get();
 	},
 
+	listByUserId(c, userId) {
+		return orm(c).select().from(account).where(
+			and(
+				eq(account.userId, userId),
+				eq(account.isDel, isDel.NORMAL)
+			)
+		)
+			.orderBy(desc(account.sort), asc(account.accountId))
+			.all();
+	},
+
 	list(c, params, userId) {
 
 		let { accountId, size, lastSort } = params;

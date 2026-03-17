@@ -75,6 +75,9 @@ With only one domain, you can create multiple different email addresses, similar
 
 - `/start`: show onboarding message
 - `/help`: show command help
+- `/compose`: start a send draft (pick sender, recipients, subject, body)
+- `/reply emailId`: create a reply draft from an email ID
+- `/cancel`: cancel the current send draft
 - `/status`: show system status (receive/send/storage/version)
 - `/stats [today]`: show stats (global by default, `today` for daily)
 - `/inbox [count]`: list latest inbox emails (default 10, max 20)
