@@ -112,6 +112,7 @@ const en = {
     date: 'Date',
     roleDesc: 'Role',
     noSubject: 'No subject',
+    emailId: 'Email ID',
     recipient: 'To',
     delivered: 'Delivered',
     complained: 'Complained',

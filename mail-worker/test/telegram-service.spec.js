@@ -50,6 +50,21 @@ describe('telegram compose send flow', () => {
 		vi.restoreAllMocks();
 	});
 
+	it('opens a reply draft directly from notification callback without existing draft', async () => {
+		const answerSpy = vi.spyOn(telegramService, 'answerCallback').mockResolvedValue();
+		const startReplySpy = vi.spyOn(telegramService, 'startReplyDraft').mockResolvedValue();
+		const getDraftSpy = vi.spyOn(telegramService, 'getDraft').mockResolvedValue(null);
+
+		await telegramService.handleComposeCallback({}, '100', { id: 'cb-1' }, {
+			action: 'notifyreply',
+			value: '55'
+		});
+
+		expect(answerSpy).toHaveBeenCalledWith({}, 'cb-1', '已打开回复草稿');
+		expect(startReplySpy).toHaveBeenCalledWith({}, '100', 55);
+		expect(getDraftSpy).not.toHaveBeenCalled();
+	});
+
 	it('sends compose drafts with admin account context', async () => {
 		const draft = {
 			...telegramService.emptyDraft('compose'),

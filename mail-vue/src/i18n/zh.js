@@ -112,6 +112,7 @@ const zh = {
     date: '时间',
     roleDesc: '权限身份',
     noSubject: '无主题',
+    emailId: '邮件ID',
     recipient: '收件人',
     delivered: '发送成功',
     complained: '被标记为垃圾',

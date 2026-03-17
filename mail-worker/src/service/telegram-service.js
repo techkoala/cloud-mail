@@ -288,6 +288,17 @@ const telegramService = {
 
 	async handleComposeCallback(c, chatId, callbackQuery, actionData) {
 
+		if (actionData.action === 'notifyreply') {
+			const emailId = Number(actionData.value);
+			if (!emailId || Number.isNaN(emailId)) {
+				await this.answerCallback(c, callbackQuery.id, '邮件ID无效');
+				return;
+			}
+			await this.answerCallback(c, callbackQuery.id, '已打开回复草稿');
+			await this.startReplyDraft(c, chatId, emailId);
+			return;
+		}
+
 		const draft = await this.getDraft(c, chatId);
 
 		if (!draft) {
@@ -356,6 +367,11 @@ const telegramService = {
 			await this.sendText(c, chatId, '用法: /reply 邮件ID');
 			return;
 		}
+
+		await this.startReplyDraft(c, chatId, emailId);
+	},
+
+	async startReplyDraft(c, chatId, emailId) {
 
 		const emailRow = await this.selectEmailFullById(c, emailId);
 
@@ -1621,6 +1637,10 @@ const telegramService = {
 							{
 								text: '查看',
 								web_app: { url: webAppUrl }
+							},
+							{
+								text: '回复',
+								callback_data: `${COMPOSE_CALLBACK_PREFIX}|notifyreply|${emailRow.emailId}`
 							}
 						]
 					]

@@ -26,6 +26,11 @@
                 </div>
               </div>
               <div class="receive"><span class="source">{{$t('recipient')}}</span><span class="receive-email">{{  formateReceive(email.recipient) }}</span></div>
+              <div class="email-id-row">
+                <span class="source">{{ $t('emailId') }}</span>
+                <span class="email-id-value">#{{ email.emailId }}</span>
+                <Icon class="copy-icon" icon="fluent-color:clipboard-24" width="18" height="18" @click="copyEmailId(email.emailId)"/>
+              </div>
               <div class="date">
                 <div>{{ formatDetailDate(email.createTime) }}</div>
               </div>
@@ -151,6 +156,24 @@ function isImage(filename) {
 function formateReceive(recipient) {
   recipient = JSON.parse(recipient)
   return recipient.map(item => item.address).join(', ')
+}
+
+async function copyEmailId(emailId) {
+  try {
+    await navigator.clipboard.writeText(String(emailId));
+    ElMessage({
+      message: t('copySuccessMsg'),
+      type: 'success',
+      plain: true,
+    })
+  } catch (err) {
+    console.error(`${t('copyFailMsg')}:`, err);
+    ElMessage({
+      message: t('copyFailMsg'),
+      type: 'error',
+      plain: true,
+    })
+  }
 }
 
 function changeStar() {
@@ -384,6 +407,22 @@ const handleDelete = () => {
         }
         span:nth-child(2) {
           color: var(--regular-text-color);
+        }
+      }
+
+      .email-id-row {
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        .email-id-value {
+          color: var(--regular-text-color);
+        }
+
+        .copy-icon {
+          cursor: pointer;
+          flex-shrink: 0;
         }
       }
 

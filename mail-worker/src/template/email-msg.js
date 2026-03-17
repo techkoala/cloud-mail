@@ -2,7 +2,9 @@ import emailUtils from '../utils/email-utils';
 
 export default function emailMsgTemplate(email, tgMsgTo, tgMsgFrom, tgMsgText) {
 
-	let template = `<b>${email.subject}</b>`
+	let template = `<b>${email.subject}</b>
+
+ID：#${email.emailId}`
 
 		if (tgMsgFrom === 'only-name') {
 			template += `
