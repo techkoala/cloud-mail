@@ -358,7 +358,7 @@
               <div class="concerning-item">
                 <span>{{ $t('version') }} :</span>
                 <el-badge is-dot :hidden="!hasUpdate">
-                  <el-button @click="jump('https://github.com/maillab/cloud-mail/releases')">
+                  <el-button @click="jump('https://github.com/techkoala/cloud-mail/releases')">
                     {{ currentVersion }}
                     <template #icon>
                       <Icon icon="qlementine-icons:version-control-16" style="font-size: 20px" color="#1890FF"/>
@@ -369,7 +369,7 @@
               <div class="concerning-item">
                 <span>{{ $t('community') }} : </span>
                 <div class="community">
-                  <el-button @click="jump('https://github.com/maillab/cloud-mail')">
+                  <el-button @click="jump('https://github.com/techkoala/cloud-mail')">
                     Github
                     <template #icon>
                       <Icon icon="codicon:github-inverted" width="22" height="22"/>
@@ -491,7 +491,7 @@
           </div>
         </template>
         <div class="forward-set-body">
-          <el-input :placeholder="$t('tgBotToken')" v-model="tgBotToken"></el-input>
+          <el-input :placeholder="setting.tgBotToken || $t('tgBotToken')" v-model="tgBotToken"></el-input>
           <el-input-tag tag-type="warning" :placeholder="$t('toBotTokenDesc')" v-model="tgChatId"
                         @add-tag="addChatTag"></el-input-tag>
           <el-input tag-type="warning" :placeholder="$t('customDomainDesc')" v-model="customDomain" ></el-input>
@@ -734,7 +734,7 @@
 </template>
 
 <script setup>
-import {computed, defineOptions, reactive, ref} from "vue";
+import {computed, defineOptions, nextTick, reactive, ref} from "vue";
 import {deleteBackground, setBackground, settingQuery, settingSet} from "@/request/setting.js";
 import {useSettingStore} from "@/store/setting.js";
 import {useUiStore} from "@/store/ui.js";
@@ -755,7 +755,7 @@ defineOptions({
   name: 'sys-setting'
 })
 
-const currentVersion = 'v2.9.0'
+const currentVersion = 'v3.0.0'
 const hasUpdate = ref(false)
 let getUpdateErrorCount = 1;
 const {t, locale} = useI18n();
@@ -779,6 +779,7 @@ const uiStore = useUiStore();
 const {settings: setting} = storeToRefs(settingStore);
 const editTitle = ref('')
 const settingLoading = ref(false)
+const settingReady = ref(false)
 const clearS3Loading = ref(false)
 const r2DomainInput = ref('')
 const loginOpacity = ref(0)
@@ -860,6 +861,7 @@ getSettings()
 getUpdate()
 
 function getSettings() {
+  settingReady.value = false
   settingQuery().then(settingData => {
     setting.value = settingData
     settingStore.domainList = settingData.domainList;
@@ -875,6 +877,9 @@ function getSettings() {
     resetNoticeForm()
     resetAddS3Form()
     resetEmailPrefix()
+    nextTick(() => {
+      settingReady.value = true
+    })
   })
 }
 
@@ -926,7 +931,7 @@ const resendList = computed(() => {
 
 function getUpdate() {
   if (getUpdateErrorCount > 5 || !getUpdateErrorCount) return
-  axios.get('https://api.github.com/repos/maillab/cloud-mail/releases/latest').then(({data}) => {
+  axios.get('https://api.github.com/repos/techkoala/cloud-mail/releases/latest').then(({data}) => {
     hasUpdate.value = data.name !== currentVersion
     getUpdateErrorCount = 0
   }).catch(e => {
@@ -969,7 +974,7 @@ function closedSetBackground() {
 
 function openTgSetting() {
   tgBotStatus.value = setting.value.tgBotStatus
-  tgBotToken.value = setting.value.tgBotToken
+  tgBotToken.value = ''
   customDomain.value = setting.value.customDomain
   tgMsgFrom.value = setting.value.tgMsgFrom
   tgMsgText.value = setting.value.tgMsgText
@@ -1122,7 +1127,6 @@ function saveS3() {
 
 function tgBotSave() {
   const form = {
-    tgBotToken: tgBotToken.value,
     customDomain: customDomain.value,
     tgBotStatus: tgBotStatus.value,
     tgChatId: tgChatId.value + '',
@@ -1130,6 +1134,7 @@ function tgBotSave() {
     tgMsgText: tgMsgText.value,
     tgMsgTo: tgMsgTo.value
   }
+  if (tgBotToken.value) form.tgBotToken = tgBotToken.value
   editSetting(form)
 }
 
@@ -1151,6 +1156,7 @@ function ruleEmailSave() {
 }
 
 function doOpacityChange() {
+  if (!settingReady.value) return
   const form = {}
   form.loginOpacity = loginOpacity.value
   editSetting(form, true)
@@ -1280,17 +1286,19 @@ function cleanResendTokenForm() {
 }
 
 function beforeChange() {
-  if (settingLoading.value) return false
+  if (!settingReady.value || settingLoading.value) return false
   backupSetting()
   return true
 }
 
 function change(e) {
+  if (!settingReady.value) return
   const settingForm = {...setting.value}
   delete settingForm.siteKey
   delete settingForm.secretKey
   delete settingForm.s3AccessKey
   delete settingForm.s3SecretKey
+  delete settingForm.tgBotToken
   delete settingForm.resendTokens
   editSetting(settingForm, false)
 }

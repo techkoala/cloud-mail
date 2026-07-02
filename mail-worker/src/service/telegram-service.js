@@ -1635,7 +1635,7 @@ const telegramService = {
 					inline_keyboard: [
 						[
 							{
-								text: '查看',
+								text: 'View',
 								web_app: { url: webAppUrl }
 							},
 							{

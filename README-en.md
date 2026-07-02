@@ -6,20 +6,20 @@
        <a href="/README.md" style="margin-left: 5px">简体中文</a> | English 
     </p>
     <p align="center">
-        <a href="https://github.com/maillab/cloud-mail/tree/main?tab=MIT-1-ov-file" target="_blank" >
+        <a href="https://github.com/techkoala/cloud-mail/tree/main?tab=MIT-1-ov-file" target="_blank" >
             <img src="https://img.shields.io/badge/license-MIT-green" />
         </a>    
-        <a href="https://github.com/maillab/cloud-mail/releases" target="_blank" >
-            <img src="https://img.shields.io/github/v/release/maillab/cloud-mail" alt="releases" />
+        <a href="https://github.com/techkoala/cloud-mail/releases" target="_blank" >
+            <img src="https://img.shields.io/github/v/release/techkoala/cloud-mail" alt="releases" />
         </a>  
-        <a href="https://github.com/maillab/cloud-mail/issues" >
-            <img src="https://img.shields.io/github/issues/maillab/cloud-mail" alt="issues" />
+        <a href="https://github.com/techkoala/cloud-mail/issues" >
+            <img src="https://img.shields.io/github/issues/techkoala/cloud-mail" alt="issues" />
         </a>  
-        <a href="https://github.com/maillab/cloud-mail/stargazers" target="_blank">
-            <img src="https://img.shields.io/github/stars/maillab/cloud-mail" alt="stargazers" />
+        <a href="https://github.com/techkoala/cloud-mail/stargazers" target="_blank">
+            <img src="https://img.shields.io/github/stars/techkoala/cloud-mail" alt="stargazers" />
         </a>  
-        <a href="https://github.com/maillab/cloud-mail/forks" target="_blank" >
-            <img src="https://img.shields.io/github/forks/maillab/cloud-mail" alt="forks" />
+        <a href="https://github.com/techkoala/cloud-mail/forks" target="_blank" >
+            <img src="https://img.shields.io/github/forks/techkoala/cloud-mail" alt="forks" />
         </a>
     </p>
     <p align="center">
