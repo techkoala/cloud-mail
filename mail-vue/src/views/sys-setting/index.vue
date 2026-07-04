@@ -263,6 +263,56 @@
                   </el-button>
                 </div>
               </div>
+              <div class="setting-item">
+                <div><span>{{ $t('aiSpamFilter') }}</span></div>
+                <div>
+                  <el-switch
+                    @change="change"
+                    :before-change="beforeChange"
+                    :active-value="0" :inactive-value="1"
+                    v-model="setting.aiSpamFilter"
+                  />
+                </div>
+              </div>
+              <div class="setting-item">
+                <div><span>{{ $t('aiDailySummary') }}</span></div>
+                <div>
+                  <el-switch
+                    @change="change"
+                    :before-change="beforeChange"
+                    :active-value="0" :inactive-value="1"
+                    v-model="setting.aiDailySummary"
+                  />
+                </div>
+              </div>
+              <div class="setting-item">
+                <div><span>{{ $t('aiDailySummaryHour') }}</span></div>
+                <div>
+                  <el-select
+                    @change="change"
+                    :before-change="beforeChange"
+                    class="bot-verify-select"
+                    v-model="setting.aiDailySummaryHour"
+                  >
+                    <el-option v-for="h in 24" :key="h - 1" :label="h - 1 + ':00'" :value="h - 1" />
+                  </el-select>
+                </div>
+              </div>
+              <div class="setting-item">
+                <div><span>{{ $t('aiPushMode') }}</span></div>
+                <div>
+                  <el-select
+                    @change="change"
+                    :before-change="beforeChange"
+                    :style="`width: ${ locale === 'en' ? 130 : 130 }px;`"
+                    v-model="setting.aiPushMode"
+                  >
+                    <el-option :label="$t('aiPushOriginal')" :value="0" />
+                    <el-option :label="$t('aiPushConcise')" :value="1" />
+                    <el-option :label="$t('aiPushDetailed')" :value="2" />
+                  </el-select>
+                </div>
+              </div>
             </div>
           </div>
 

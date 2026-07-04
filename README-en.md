@@ -59,6 +59,8 @@ With only one domain, you can create multiple different email addresses, similar
 
 - **🤖 Telegram Commands (MVP)**: Only admin `chat_id` can run bot commands (query + add user).
 
+- **🧠 AI Features**: Integrated Cloudflare Workers AI for spam filtering, AI push summaries, and daily email digests.
+
 - **📡 Open API**: Supports batch user creation via API and multi-condition email queries
 
 - **📈 Data Visualization**: Use ECharts to visualize system data, including user email growth.
@@ -90,6 +92,7 @@ With only one domain, you can create multiple different email addresses, similar
 - `/user userId`: show user details (status, role, mailbox count, sent count)
 - `/adduser email roleId`: create user with generated random password
 - `/adduser email password roleId`: create user with custom password
+- `/summary [count]`: AI summary of recent emails (default 5, max 20)
 
 ### Setup Steps
 
@@ -106,6 +109,29 @@ With only one domain, you can create multiple different email addresses, similar
    - `matched = true` means webhook URL is correctly configured
 
 > Note: only chat IDs in `tgChatId` are allowed to run commands. Unauthorized chat IDs are ignored.
+
+
+## AI Features Setup
+
+This project integrates Cloudflare Workers AI with the following features:
+
+| Feature | Description | Default |
+|---------|-------------|---------|
+| AI Spam Filter | Detects spam and skips TG forwarding | Off |
+| Daily AI Summary | Sends yesterday's email digest to TG at configured time | Off |
+| AI Push Mode | TG notification format: Original / Concise (core content) / Detailed (structured summary) | Original |
+| TG `/summary` command | On-demand AI summary of recent emails | Always available |
+
+### Setup Steps
+
+1. **AI binding is pre-configured**: `wrangler-action.toml` already includes `[ai] binding = "AI"`. No extra setup needed.
+
+2. **Run database migration**: After deployment, visit `https://your-domain/api/init/your_jwt_secret` to apply new columns.
+
+3. **Enable in Web UI**: Go to System Settings → Email Push card, toggle the desired features on.
+
+> All AI features default to **off**. Leaving them off has zero impact on existing functionality.
+> Workers AI provides **10,000 neurons/day** for free, more than enough for personal use.
 
 ## Tech Stack
 

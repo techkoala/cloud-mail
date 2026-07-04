@@ -28,8 +28,30 @@ const dbInit = {
 		await this.v2_7DB(c);
 		await this.v2_8DB(c);
 		await this.v2_9DB(c);
+		await this.v2_10DB(c);
+		await this.v2_11DB(c);
 		await settingService.refresh(c);
 		return c.text('success');
+	},
+
+	async v2_11DB(c) {
+		try {
+			await c.env.db.prepare('ALTER TABLE setting ADD COLUMN ai_daily_summary_hour INTEGER NOT NULL DEFAULT 2;').run();
+		} catch (e) {
+			console.warn('跳过AI字段：' + e.message);
+		}
+	},
+
+	async v2_10DB(c) {
+		try {
+			await c.env.db.batch([
+				c.env.db.prepare('ALTER TABLE setting ADD COLUMN ai_spam_filter INTEGER NOT NULL DEFAULT 0;'),
+				c.env.db.prepare('ALTER TABLE setting ADD COLUMN ai_daily_summary INTEGER NOT NULL DEFAULT 0;'),
+				c.env.db.prepare('ALTER TABLE setting ADD COLUMN ai_push_mode INTEGER NOT NULL DEFAULT 0;')
+			]);
+		} catch (e) {
+			console.warn('跳过AI字段：' + e.message);
+		}
 	},
 
 	async v2_9DB(c) {

@@ -19,6 +19,24 @@
 | `JWT_SECRET`            |  ✅  | 用于生成和验证 JWT 的随机长字符串                     |
 | `INIT_URL`              |  ❌  | （可选）部署后用于初始化数据库的 Worker URL（格式参考下述手动初始化）           |
 
+> **注意**：部署后需访问 `https://你的域名/api/init/你的jwt_secret` 运行数据库迁移，以应用新增字段（包括 AI 功能字段）。
+
+---
+
+> **关于环境变量与数据库绑定**：
+>
+> **方式一：Cloudflare 自动 Git 部署**（Dashboard 关联 GitHub 仓库）
+> - `wrangler.toml` 使用 `${VAR}` 占位符，部署时从 Cloudflare Dashboard 设置的变量中读取
+> - 需在 Workers & Pages → 你的 Worker → Settings → Variables and Secrets 中添加 `D1_DATABASE_ID`、`KV_NAMESPACE_ID`
+>
+> **方式二：GitHub Actions 部署**
+> - 使用 `wrangler-action.toml`，绑定通过 `${VAR}` 占位符从 GitHub Secrets 注入
+> - 需要在上方设置 `D1_DATABASE_ID`、`KV_NAMESPACE_ID` 等 Secrets
+>
+> **本地命令行部署**：需在 `mail-worker/` 目录下手动创建 `.env` 文件并写入相应值（`.env` 已加入 `.gitignore`）
+
+---
+
 ---
 
 **获取 Cloudflare API 令牌**

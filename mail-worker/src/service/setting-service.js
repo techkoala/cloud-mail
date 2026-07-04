@@ -205,7 +205,11 @@ const settingService = {
 			linuxdoClientId: settingRow.linuxdoClientId,
 			linuxdoCallbackUrl: settingRow.linuxdoCallbackUrl,
 			linuxdoSwitch: settingRow.linuxdoSwitch,
-			minEmailPrefix: settingRow.minEmailPrefix
+			minEmailPrefix: settingRow.minEmailPrefix,
+			aiSpamFilter: settingRow.aiSpamFilter,
+			aiDailySummary: settingRow.aiDailySummary,
+			aiPushMode: settingRow.aiPushMode,
+			aiDailySummaryHour: settingRow.aiDailySummaryHour
 		};
 	}
 };

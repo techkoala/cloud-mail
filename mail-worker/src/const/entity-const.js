@@ -132,6 +132,24 @@ export const settingConst = {
 	authRefresh: {
 		OPEN: 1,
 		CLOSE: 0
+	},
+	aiSpamFilter: {
+		OPEN: 0,
+		CLOSE: 1
+	},
+	aiDailySummary: {
+		OPEN: 0,
+		CLOSE: 1
+	},
+	aiPushMode: {
+		ORIGINAL: 0,
+		CONCISE: 1,
+		DETAILED: 2
+	},
+	aiDailySummaryHour: {
+		MIN: 0,
+		MAX: 23,
+		DEFAULT: 2
 	}
 }
 

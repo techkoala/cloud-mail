@@ -7,13 +7,14 @@ import emailMsgTemplate from '../template/email-msg';
 import emailTextTemplate from '../template/email-text';
 import emailHtmlTemplate from '../template/email-html';
 import domainUtils from '../utils/domain-uitls';
-import { emailConst, isDel } from '../const/entity-const';
+import { emailConst, isDel, settingConst } from '../const/entity-const';
 import userService from './user-service';
 import roleService from './role-service';
 import accountService from './account-service';
 import emailService from './email-service';
 import analysisDao from '../dao/analysis-dao';
 import r2Service from './r2-service';
+import aiService from './ai-service';
 import KvConst from '../const/kv-const';
 import dayjs from 'dayjs';
 import cryptoUtils from '../utils/crypto-utils';
@@ -256,6 +257,11 @@ const telegramService = {
 
 		if (command === '/adduser') {
 			await this.addUserCommand(c, chatId, argsList);
+			return;
+		}
+
+		if (command === '/summary') {
+			await this.sendAiSummary(c, chatId, argsList);
 			return;
 		}
 
@@ -1012,6 +1018,7 @@ const telegramService = {
 			`/stats [today] - 查看统计信息\n` +
 			`/inbox [数量] - 查看最近收件（默认 10，最大 20）\n` +
 			`/unread [数量] - 查看未读邮件（默认 10，最大 20）\n` +
+			`/summary [数量] - AI 总结最近邮件（默认 5，最大 20）\n` +
 			`/search 关键词 - 按发件人/收件人/主题搜索\n` +
 			`/mail 邮件ID - 查看指定邮件详情\n` +
 			`/mailraw 邮件ID - 查看邮件文本摘要\n` +
@@ -1614,7 +1621,78 @@ const telegramService = {
 		}
 	},
 
-	async sendEmailToBot(c, emailRow) {
+	async sendAiSummary(c, chatId, argsList) {
+		const limit = this.parseLimit(argsList?.[0], 5, 20)
+		const emails = await this.selectReceiveList(c, null, limit)
+
+		if (!emails || emails.length === 0) {
+			await this.sendText(c, chatId, 'No recent emails found.')
+			return
+		}
+
+		await this.sendText(c, chatId, 'Generating summary...')
+		const summary = await aiService.summarizeEmails(c, emails)
+
+		if (!summary) {
+			await this.sendText(c, chatId, 'AI summary unavailable. Here is the list instead:\n' +
+				emails.map(e => `#${e.emailId}: ${e.subject}`).join('\n'))
+			return
+		}
+
+		await this.sendText(c, chatId, summary)
+	},
+
+	async sendAiDailySummary(c) {
+		const setting = await settingService.query(c)
+		const { tgBotToken, tgChatId, aiDailySummary, aiDailySummaryHour } = setting
+
+		if (aiDailySummary !== settingConst.aiDailySummary.OPEN) return
+		if (!tgBotToken || !tgChatId) return
+
+		const hour = typeof aiDailySummaryHour === 'number' ? aiDailySummaryHour : settingConst.aiDailySummaryHour.DEFAULT
+		const nowHour = new Date().getUTCHours()
+
+		if (nowHour !== hour) return
+
+		const todayStr = new Date().toISOString().slice(0, 10)
+		const sentKey = KvConst.AI_DAILY_SUMMARY_SENT + todayStr
+		const alreadySent = await c.env.kv.get(sentKey)
+
+		if (alreadySent) return
+
+		const emails = await c.env.db.prepare(`
+			SELECT email_id, subject, name, send_email, to_email, create_time
+			FROM email
+			WHERE type = 0
+			  AND status != 6
+			  AND is_del = 0
+			  AND DATE(create_time) = DATE('now', '-1 day')
+			ORDER BY email_id DESC
+			LIMIT 50
+		`).all().then(res => (res.results || []).map(r => ({
+			emailId: r.email_id,
+			subject: r.subject,
+			name: r.name,
+			sendEmail: r.send_email,
+			toEmail: r.to_email,
+			createTime: r.create_time
+		})))
+
+		if (emails.length === 0) return
+
+		const summary = await aiService.summarizeEmails(c, emails)
+		if (!summary) return
+
+		const header = '📬 Daily Email Summary\n\n'
+		const tgChatIds = tgChatId.split(',').map(item => item.trim()).filter(Boolean)
+		await Promise.all(tgChatIds.map(chatId =>
+			this.sendText(c, chatId, header + summary).catch(() => {})
+		))
+
+		await c.env.kv.put(sentKey, '1', { expirationTtl: 86400 })
+	},
+
+	async sendEmailToBot(c, emailRow, pushMode = 0) {
 
 		const { tgBotToken, tgChatId, customDomain, tgMsgTo, tgMsgFrom, tgMsgText } = await settingService.query(c);
 
@@ -1626,11 +1704,25 @@ const telegramService = {
 		const jwtToken = await jwtUtils.generateToken(c, { emailId: emailRow.emailId });
 		const webAppUrl = customDomain ? `${domainUtils.toOssDomain(customDomain)}/api/telegram/getEmail/${jwtToken}` : 'https://www.cloudflare.com/404';
 
+		let messageText
+
+		if (pushMode === 1 || pushMode === 2) {
+			const aiResult = await aiService.generatePushMsg(c, emailRow, pushMode)
+			if (aiResult && aiResult.text) {
+				const sender = emailRow.name || emailRow.sendEmail || ''
+				messageText = `<b>${escapeHtml(aiResult.text.slice(0, 200))}</b>\n\nFrom: ${escapeHtml(sender)}`
+			}
+		}
+
+		if (!messageText) {
+			messageText = emailMsgTemplate(emailRow, tgMsgTo, tgMsgFrom, tgMsgText)
+		}
+
 		await Promise.all(tgChatIds.map(async chatId => {
 			await this.telegramApi(c, 'sendMessage', {
 				chat_id: chatId,
 				parse_mode: 'HTML',
-				text: emailMsgTemplate(emailRow, tgMsgTo, tgMsgFrom, tgMsgText),
+				text: messageText,
 				reply_markup: {
 					inline_keyboard: [
 						[
